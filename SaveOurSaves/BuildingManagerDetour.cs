@@ -89,7 +89,7 @@ namespace SaveOurSaves
                             flag = true;
                         }
                         num5 = this.m_buildings.m_buffer[(int)num5].m_nextGridBuilding;
-                        if (++num6 >= 32768)
+                        if (++num6 >= 49152)
                         {
                             CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                             break;
@@ -132,7 +132,7 @@ namespace SaveOurSaves
                         }
 
                         num7 = this.m_buildings.m_buffer[(int)num7].m_nextGridBuilding;
-                        if (++num8 >= 32768)
+                        if (++num8 >= 49152)
                         {
                             CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + System.Environment.StackTrace);
                             break;
