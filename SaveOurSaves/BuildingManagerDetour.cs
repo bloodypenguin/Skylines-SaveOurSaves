@@ -12,6 +12,8 @@ namespace SaveOurSaves
         private static RedirectCallsState _state1;
         private static RedirectCallsState _state2;
         private static bool deployed;
+        private static MethodInfo ignoreOverlap = typeof(BuildingManager).GetMethod("IgnoreOverlap",
+                BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static void Deploy()
         {
@@ -59,11 +61,8 @@ namespace SaveOurSaves
             this.UpdateBuildingRenderer(building, ref buildingObj, updateGroup);
         }
 
-        public bool OverlapQuad(Quad2 quad, float minY, float maxY, ItemClass.Layer layers, ushort ignoreBuilding, ushort ignoreNode1, ushort ignoreNode2, ulong[] buildingMask)
+        public bool OverlapQuad(Quad2 quad, float minY, float maxY, ItemClass.CollisionType collisionType, ItemClass.Layer layers, ushort ignoreBuilding, ushort ignoreNode1, ushort ignoreNode2, ulong[] buildingMask)
         {
-            var ignoreOverlap = typeof (BuildingManager).GetMethod("IgnoreOverlap",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
             Vector2 vector2_1 = quad.Min();
             Vector2 vector2_2 = quad.Max();
             int num1 = Mathf.Max((int)(((double)vector2_1.x - 72.0) / 64.0 + 135.0), 0);
@@ -79,9 +78,9 @@ namespace SaveOurSaves
                     int num6 = 0;
                     while ((int)num5 != 0)
                     {
-                        //mod: add null check
                         BuildingInfo info = this.m_buildings.m_buffer[(int)num5].Info;
-                        if ((layers == ItemClass.Layer.None || (info!=null && (info.m_class.m_layer & layers) != ItemClass.Layer.None)) && (!(bool)ignoreOverlap.Invoke(this, new object[] { num5, ignoreBuilding, ignoreNode1, ignoreNode2 }) && this.m_buildings.m_buffer[(int)num5].OverlapQuad(num5, quad, minY, maxY)))
+                        //mod: add null check
+                        if ((layers == ItemClass.Layer.None || (info != null && (info.m_class.m_layer & layers) != ItemClass.Layer.None)) && (!(bool)ignoreOverlap.Invoke(this, new object[] { num5, ignoreBuilding, ignoreNode1, ignoreNode2 }) && this.m_buildings.m_buffer[(int)num5].OverlapQuad(num5, quad, minY, maxY, collisionType)))
                         {
                             if (buildingMask == null)
                                 return true;
@@ -116,8 +115,8 @@ namespace SaveOurSaves
                     int num8 = 0;
                     while ((int)num7 != 0)
                     {
-                        BuildingInfo info = this.m_buildings.m_buffer[(int)num7].Info;
                         //mod: add null check
+                        BuildingInfo info = this.m_buildings.m_buffer[(int)num7].Info;
                         if (info != null)
                         {
                             if ((info.m_class.m_service == service || service == ItemClass.Service.None) && (info.m_class.m_subService == subService || subService == ItemClass.SubService.None) && (this.m_buildings.m_buffer[(int)num7].m_flags & (flagsRequired | flagsForbidden)) == flagsRequired)
@@ -130,11 +129,10 @@ namespace SaveOurSaves
                                 }
                             }
                         }
-
                         num7 = this.m_buildings.m_buffer[(int)num7].m_nextGridBuilding;
                         if (++num8 >= 49152)
                         {
-                            CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + System.Environment.StackTrace);
+                            CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                             break;
                         }
                     }
