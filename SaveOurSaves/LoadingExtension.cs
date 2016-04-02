@@ -1,18 +1,21 @@
-﻿using System.Reflection;
-using ColossalFramework.Math;
-using ColossalFramework.Steamworks;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using ICities;
+using SaveOurSaves.Detours;
+using SaveOurSaves.Redirection;
 
 namespace SaveOurSaves
 {
     public class LoadingExtension : LoadingExtensionBase
     {
+
+        private static Dictionary<MethodInfo, RedirectCallsState> _redirects;
+
         public override void OnCreated(ILoading loading)
         {
-            LoadingProfilerDetour.Deploy();
-            BuildingManagerDetour.Deploy();
-            LoadingProfilerDetour.fixesApplied = false;
-            LoadingProfilerDetour.counter = 0;
+            base.OnCreated(loading);
+            _redirects = RedirectionUtil.RedirectAssembly();
+            LoadingProfilerDetour.Initialize();
 
         }
 
@@ -20,9 +23,7 @@ namespace SaveOurSaves
         {
             base.OnReleased();
             LoadingProfilerDetour.Revert();
-            BuildingManagerDetour.Revert();
-            LoadingProfilerDetour.fixesApplied = false;
-            LoadingProfilerDetour.counter = 0;
+            RedirectionUtil.RevertRedirects(_redirects);
         }
     }
 }

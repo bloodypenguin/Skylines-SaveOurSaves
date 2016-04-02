@@ -1,56 +1,21 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.Math;
+using SaveOurSaves.Redirection;
 using UnityEngine;
 
-namespace SaveOurSaves
+namespace SaveOurSaves.Detours
 {
+    [TargetType(typeof(BuildingManager))]
     public class BuildingManagerDetour : BuildingManager
     {
         private static RedirectCallsState _state1;
         private static RedirectCallsState _state2;
-        private static bool deployed;
         private static MethodInfo ignoreOverlap = typeof(BuildingManager).GetMethod("IgnoreOverlap",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-        public static void Deploy()
-        {
-            if (!deployed)
-            {
-                //                RedirectionHelper.RedirectCalls(
-                //                    typeof(BuildingManager).GetMethod("UpdateBuildingRenderer", BindingFlags.Instance | BindingFlags.Public, null, new[]{typeof(ushort), typeof(bool)} , null),
-                //                    typeof(BuildingManagerDetour).GetMethod("UpdateBuildingRenderer", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(ushort), typeof(bool) }, null));
-                //
-                _state1 = RedirectionHelper.RedirectCalls(
-                   typeof(BuildingManager).GetMethod("OverlapQuad", new[] { typeof(Quad2), typeof(float), typeof(float), typeof(ItemClass.Layer), typeof(ushort), typeof(ushort), typeof(ushort), typeof(ulong[]) }),
-                   typeof(BuildingManagerDetour).GetMethod("OverlapQuad", new[] { typeof(Quad2), typeof(float), typeof(float), typeof(ItemClass.Layer), typeof(ushort), typeof(ushort), typeof(ushort), typeof(ulong[]) }));
-
-                _state2 = RedirectionHelper.RedirectCalls(
-                    typeof(BuildingManager).GetMethod("FindBuilding"),
-                    typeof(BuildingManagerDetour).GetMethod("FindBuilding"));
-
-
-                deployed = true;
-            }
-        }
-
-        public static void Revert()
-        {
-            if (deployed)
-            {
-                RedirectionHelper.RevertRedirect(
-                    typeof(BuildingManager).GetMethod("OverlapQuad", new[] { typeof(Quad2), typeof(float), typeof(float), typeof(ItemClass.Layer), typeof(ushort), typeof(ushort), typeof(ushort), typeof(ulong[]) }),
-                    _state1);
-                RedirectionHelper.RevertRedirect(
-                    typeof(BuildingManager).GetMethod("FindBuilding"),
-                    _state2);
-
-                deployed = false;
-            }
-        }
-
+        //[RedirectMethod]
         public void UpdateBuildingRenderer(ushort building, bool updateGroup)
         {
             var buildingObj = this.m_buildings.m_buffer[(int)building];
@@ -61,6 +26,7 @@ namespace SaveOurSaves
             this.UpdateBuildingRenderer(building, ref buildingObj, updateGroup);
         }
 
+        [RedirectMethod]
         public bool OverlapQuad(Quad2 quad, float minY, float maxY, ItemClass.CollisionType collisionType, ItemClass.Layer layers, ushort ignoreBuilding, ushort ignoreNode1, ushort ignoreNode2, ulong[] buildingMask)
         {
             Vector2 vector2_1 = quad.Min();
@@ -99,6 +65,7 @@ namespace SaveOurSaves
             return flag;
         }
 
+        [RedirectMethod]
         public ushort FindBuilding(Vector3 pos, float maxDistance, ItemClass.Service service, ItemClass.SubService subService, Building.Flags flagsRequired, Building.Flags flagsForbidden)
         {
             int num1 = Mathf.Max((int)(((double)pos.x - (double)maxDistance) / 64.0 + 135.0), 0);

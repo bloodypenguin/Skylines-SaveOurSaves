@@ -3,10 +3,12 @@ using System.Linq;
 using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.IO;
+using SaveOurSaves.Redirection;
 using UnityEngine;
 
-namespace SaveOurSaves
+namespace SaveOurSaves.Detours
 {
+    [TargetType(typeof(LoadingProfiler))]
     public class LoadingProfilerDetour : LoadingProfiler
     {
         private static readonly string[] managers = {
@@ -25,9 +27,8 @@ namespace SaveOurSaves
             "ElectricityManager",
             "WaterManager",
             "ZoneManager",
-            "ropManager",
+            "PropManager",
             "TreeManager",
-            "WindManager",
             "VehicleManager",
             "TransportManager",
             "EconomyManager",
@@ -36,40 +37,27 @@ namespace SaveOurSaves
             "StatisticsManager",
             "UnlockManager",
             "MessageManager",
+            "WeatherManager",
             "GuideManager"
         };
 
-        private static RedirectCallsState _state;
-        private static bool deployed;
         public static int counter = 0;
         public static bool fixesApplied = false;
 
 
-        public static void Deploy()
+        public static void Initialize()
         {
+            fixesApplied = false;
             counter = 0;
-            if (!deployed)
-            {
-                _state = RedirectionHelper.RedirectCalls(
-                    typeof(LoadingProfiler).GetMethod("EndAfterDeserialize"),
-                    typeof(LoadingProfilerDetour).GetMethod("EndAfterDeserialize"));
-                deployed = true;
-            }
         }
 
         public static void Revert()
         {
+            fixesApplied = false;
             counter = 0;
-            if (deployed)
-            {
-                RedirectionHelper.RevertRedirect(
-                    typeof(LoadingProfiler).GetMethod("EndAfterDeserialize"),
-                    _state);
-                deployed = false;
-            }
         }
 
-
+        [RedirectMethod]
         public void EndAfterDeserialize(DataSerializer s, string name)
         {
             try
