@@ -165,18 +165,18 @@ namespace SaveOurSaves.Detours
             Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
             for (int i = 0; i < vehicles.m_size; i++)
             {
-                if (vehicles.m_buffer[i].m_flags != Vehicle.Flags.None)
+                if (vehicles.m_buffer[i].m_flags != 0)
                 {
                     try
                     {
-                        bool exists = (vehicles.m_buffer[i].m_flags & Vehicle.Flags.Spawned) != Vehicle.Flags.None;
+                        bool exists = (vehicles.m_buffer[i].m_flags & Vehicle.Flags.Spawned) != 0;
 
                         // Vehicle validity
                         InstanceID target;
                         bool isInfoNull = vehicles.m_buffer[i].Info == null;
                         bool isLeading = vehicles.m_buffer[i].m_leadingVehicle == 0;
                         bool isWaiting = !exists &&
-                                         (vehicles.m_buffer[i].m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None;
+                                         (vehicles.m_buffer[i].m_flags & Vehicle.Flags.WaitingSpace) != 0;
                         bool isConfused = exists && isLeading && !isInfoNull &&
                                           vehicles.m_buffer[i].Info.m_vehicleAI.GetLocalizedStatus((ushort)i,
                                               ref vehicles.m_buffer[i], out target) ==

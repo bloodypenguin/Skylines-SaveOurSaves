@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Detours\BuildingManagerDetour.cs" />
+    <Compile Include="Detours\NetManagerDetour.cs" />
+    <Compile Include="Detours\NetSegmentDetour.cs" />
+    <Compile Include="Detours\PropManagerDetour.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Detours\LoadingProfilerDetour.cs" />
     <Compile Include="Mod.cs" />
