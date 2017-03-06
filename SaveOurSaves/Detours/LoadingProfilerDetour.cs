@@ -90,6 +90,7 @@ namespace SaveOurSaves.Detours
 
         private static void RepairSave()
         {
+            FixBrokenSegments();
             FixBrokenTransfers();
             FixBrokenVehicles();
             FixBrokenCitizens();
@@ -392,6 +393,30 @@ namespace SaveOurSaves.Detours
             if (brokenCount > 0) Debug.Log("Removed " + brokenCount + " broken prop instances.");
         }
 
+        private static void FixBrokenSegments()
+        {
+            var brokenCount = 0;
+
+            // Fix broken props
+            Array16<NetSegment> segments = NetManager.instance.m_segments;
+            for (int i = 0; i < segments.m_size; i++)
+            {
+                if (segments.m_buffer[i].Info == null)
+                {
+                    try
+                    {
+                        NetManager.instance.ReleaseSegment((ushort)i, false);
+                        brokenCount++;
+                    }
+                    catch (Exception e)
+                    {
+                        UnityEngine.Debug.LogException(e);
+                    }
+                }
+            }
+
+            if (brokenCount > 0) Debug.Log("Removed " + brokenCount + " broken segment instances.");
+        }
 
 
 
